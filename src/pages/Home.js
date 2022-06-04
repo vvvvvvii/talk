@@ -5,7 +5,7 @@ function Home() {
     <Container>
       <Logo>TALK</Logo>
       <Input placeholder="輸入暱稱"></Input>
-      <Button type="button" warning theme={theme}>
+      <Button warning theme={theme} href="/chat-room">
         開始聊天
       </Button>
     </Container>
@@ -14,6 +14,7 @@ function Home() {
 const theme = {
   primary: "#d7c378",
   lightPrimary: "#faf7ec",
+  darkPrimary: "#6b5103",
   warning: "#FBDF5A",
   info: "#1fb50c",
   white: "#fff",
@@ -54,16 +55,20 @@ const Input = styled.input`
     background: #fff;
   }
 `;
-const Button = styled.button`
+const Button = styled.a`
   border-radius: 0.25rem;
   padding: 0.5rem;
   font-size: 1.25rem;
   top: 0;
+  color: #000;
   ${(props) =>
     props.warning &&
     css`
       background: ${(props) => props.theme.warning};
-      border-color: ${(props) => props.theme.primary};
-    `}
+      border: 1px solid ${(props) => props.theme.darkPrimary};
+    `};
+  &:hover {
+    color: #6b5103;
+  }
 `;
 export default Home;
