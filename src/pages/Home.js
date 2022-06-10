@@ -1,16 +1,30 @@
 import styled, { css } from "styled-components";
+import React, { useState } from "react";
 
 function Home() {
+  const [userName, setUserName] = useState("主人");
+  const saveLocalStorage = () => {
+    localStorage.setItem("talkUserName", userName);
+  };
   return (
     <Container>
       <Logo>TALK</Logo>
-      <Input placeholder="輸入暱稱"></Input>
-      <Button warning theme={theme} href="/chat-room">
+      <Input
+        placeholder="輸入暱稱"
+        onChange={(e) => setUserName(e.target.value)}
+      />
+      <Button
+        warning
+        theme={theme}
+        href="/chat-room"
+        onClick={() => saveLocalStorage()}
+      >
         開始聊天
       </Button>
     </Container>
   );
 }
+
 const theme = {
   primary: "#d7c378",
   lightPrimary: "#faf7ec",
@@ -19,7 +33,6 @@ const theme = {
   info: "#1fb50c",
   white: "#fff",
 };
-
 const Container = styled.div`
   height: 100vh;
   display: flex;

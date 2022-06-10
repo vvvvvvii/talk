@@ -1,7 +1,94 @@
 import styled, { css } from "styled-components";
 import { ReplyFill, Send, GearFill } from "react-bootstrap-icons";
+import React, { useEffect, useState } from "react";
 
 function ChatRoom() {
+  const [userName, setUserName] = useState("");
+  const [time, setTime] = useState({
+    year: "",
+    month: "",
+    date: "",
+    hour: "",
+    min: "",
+  });
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    setUserName(localStorage.getItem("talkUserName"));
+  }, []);
+  useEffect(() => {
+    if (userName !== "") {
+      getTime();
+    }
+  }, [userName]);
+  useEffect(() => {
+    if (time.year !== "" && userName !== "") {
+      setTimeout(() => {
+        setMessages([
+          {
+            type: "received",
+            date: `${time.year}/${time.month}/${time.date}`,
+            time: `${time.hour}:${time.min}`,
+            input: `嗨${userName}！有什麼能為您效勞的嗎？`,
+            options: [],
+          },
+        ]);
+      }, 500);
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            type: "received",
+            date: `${time.year}/${time.month}/${time.date}`,
+            time: `${time.hour}:${time.min}`,
+            input: "",
+            options: ["查詢今日天氣", "等等吃什麼"],
+          },
+        ]);
+      }, 1000);
+    }
+  }, [time.year, time.month, time.date, time.hour, time.min, userName]);
+
+  const getTime = () => {
+    const year = new Date().getFullYear().toString();
+    let month = (new Date().getMonth() + 1).toString();
+    let date = new Date().getDate().toString();
+    let hour = new Date().getHours().toString();
+    let min = new Date().getMinutes().toString();
+    const checkLengthArr = [month, date, hour, min];
+    checkLengthArr.forEach((item, index) => {
+      if (item.length === 1) {
+        checkLengthArr[index] = `0${item}`;
+      }
+    });
+    setTime({
+      year,
+      month: checkLengthArr[0],
+      date: checkLengthArr[1],
+      hour: checkLengthArr[2],
+      min: checkLengthArr[3],
+    });
+  };
+  const sendMessage = (e) => {
+    e.preventDefault();
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth() + 1;
+    const date = new Date().getDate();
+    const hour = new Date().getHours();
+    const min = new Date().getMinutes();
+    setMessages([
+      ...messages,
+      {
+        type: "sended",
+        date: `${year}/${month}/${date}`,
+        time: `${hour}:${min}`,
+        input,
+        options: [],
+      },
+    ]);
+    setInput("");
+  };
   return (
     <div>
       <Header>
@@ -14,39 +101,54 @@ function ChatRoom() {
         </a>
       </Header>
       <Body>
-        <DialogWrapper>
-          <Dialog received>
-            對方傳的訊息對方傳的訊息對方傳的訊息對方傳的訊息對方傳的訊息對方傳的訊息對方傳的訊息對方傳的訊息對方傳的訊息
-          </Dialog>
-          <div className="ml-1">
-            <Text>2022/6/4</Text>
-            <Text>12:50</Text>
-          </div>
-        </DialogWrapper>
-        <DialogWrapper sended>
-          <div className="mr-1 text-end">
-            <Text>2022/6/4</Text>
-            <Text>12:50</Text>
-          </div>
-          <Dialog sended>
-            我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息
-            我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息我傳的訊息
-          </Dialog>
-        </DialogWrapper>
-        <DialogWrapper>
-          <Dialog received>
-            對方傳的訊息對方傳的訊息對方傳的訊息對方傳的訊息
-          </Dialog>
-          <div className="ml-1">
-            <Text>2022/6/4</Text>
-            <Text>12:51</Text>
-          </div>
-        </DialogWrapper>
+        {messages.map((message, messageKey) => {
+          if (message.type === "received") {
+            if (message.options.length === 0) {
+              return (
+                <DialogWrapper received key={`id${messageKey}`}>
+                  <Dialog received>{message.input}</Dialog>
+                  <div className="ml-1">
+                    <Text>{message.date}</Text>
+                    <Text>{message.time}</Text>
+                  </div>
+                </DialogWrapper>
+              );
+            } else {
+              return (
+                <DialogWrapper received key={`id${messageKey}`}>
+                  <Dialog received>
+                    {message.options.map((option) => (
+                      <p key={option}>{option}</p>
+                    ))}
+                  </Dialog>
+                  <div className="ml-1">
+                    <Text>{message.date}</Text>
+                    <Text>{message.time}</Text>
+                  </div>
+                </DialogWrapper>
+              );
+            }
+          } else
+            return (
+              <DialogWrapper sended key={`id${messageKey}`}>
+                <div className="mr-1 text-end">
+                  <Text>{message.date}</Text>
+                  <Text>{message.time}</Text>
+                </div>
+                <Dialog sended>{message.input}</Dialog>
+              </DialogWrapper>
+            );
+        })}
       </Body>
       <Footer>
-        <Input></Input>
-        <a href="/" className="p-1" title="送出">
-          <Send className="ml-2 fs-4" color="#6b5103"></Send>
+        <Input value={input} onChange={(e) => setInput(e.target.value)} />
+        <a
+          href="/"
+          className="p-1"
+          title="送出"
+          onClick={(e) => sendMessage(e)}
+        >
+          <Send className="ml-2 fs-4" color="#6b5103" />
         </a>
       </Footer>
     </div>
@@ -75,7 +177,6 @@ const Header = styled.div`
 `;
 const Body = styled.div`
   padding: 10rem 2.5rem;
-  background: #faf7ec;
 `;
 const Footer = styled.div`
   position: fixed;
@@ -105,22 +206,22 @@ const Text = styled.p`
   color: #6b5103;
 `;
 const DialogWrapper = styled.div`
-  max-width: 50%;
   margin: 3rem;
   display: flex;
   align-items: end;
   ${(props) =>
     props.sended &&
     css`
-      margin-left: 50%;
+      justify-content: flex-end;
     `}
 `;
 const Dialog = styled.div`
-  width: fit-content;
+  max-width: 50%;
   position: relative;
   background-color: #fef1bd;
   padding: 1rem 1.5rem;
   border-radius: 0.5rem;
+  word-wrap: break-word;
   &::after {
     content: "";
     border-style: solid;
