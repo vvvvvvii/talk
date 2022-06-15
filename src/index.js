@@ -1,6 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  HashRouter,
+} from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.css";
 import GlobalStyle from "./styles/globalStyles.js";
@@ -16,19 +21,13 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <GlobalStyle />
-    <Router>
+    <HashRouter basename="/">
       <Switch>
-        <Route exact path="/">
-          <Home />
-        </Route>
-        <Route exact path="/chat-room">
-          <ChatRoom />
-        </Route>
-        <Route path="*">
-          <NotFound />
-        </Route>
+        <Route exact path="/" component={Home} />
+        <Route exact path="/chat-room" component={ChatRoom} />
+        <Route path="*" component={NotFound} />
       </Switch>
-    </Router>
+    </HashRouter>
   </React.StrictMode>
 );
 

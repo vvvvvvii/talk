@@ -228,11 +228,11 @@ const ChatRoom = () => {
   return (
     <div>
       <Header>
-        <a href="/" className="p-1" title="離開聊天">
+        <a href="/talk" className="p-1" title="離開聊天">
           <ReplyFill className="fs-3" color="#6b5103"></ReplyFill>
         </a>
         <h2 className="fs-2">聊天室</h2>
-        <a href="/" className="p-1" title="設定">
+        <a href="/talk" disabled className="p-1" title="設定">
           <GearFill className="fs-3" color="#6b5103"></GearFill>
         </a>
       </Header>

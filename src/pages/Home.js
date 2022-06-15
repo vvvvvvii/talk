@@ -16,7 +16,7 @@ function Home() {
       <Button
         warning
         theme={theme}
-        href="/chat-room"
+        href="https://vvvvvvii.github.io/talk/#/chat-room"
         onClick={() => saveLocalStorage()}
       >
         開始聊天
