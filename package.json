@@ -18,13 +18,14 @@
     "react-transition-group": "^4.4.2",
     "styled-components": "^5.3.5",
     "web-vitals": "^2.1.4",
-    "homepage": "https://vvvvvvii.github.io/talk/public/index.html"
+    "homepage": "https://vvvvvvii.github.io/talk/"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "npm run build"
   },
   "eslintConfig": {
     "extends": [
