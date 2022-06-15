@@ -2,19 +2,9 @@ import styled, { css } from "styled-components";
 import { ReplyFill, Send, GearFill } from "react-bootstrap-icons";
 import React, { useEffect, useState } from "react";
 import { useGetWeather } from "../hooks/useGetWeather";
-import axios from "axios";
-
-let targetURL = `https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=${process.env.REACT_APP_URL}&format=JSON`;
 
 function ChatRoom() {
   const [userName, setUserName] = useState("");
-  const [time, setTime] = useState({
-    year: "",
-    month: "",
-    date: "",
-    hour: "",
-    min: "",
-  });
   // const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [isMounted, setIsMounted] = useState(true);
@@ -25,30 +15,51 @@ function ChatRoom() {
     setUserName(localStorage.getItem("talkUserName"));
   }, []);
   useEffect(() => {
-    if (userName !== "") {
-      getTime();
-    }
-  }, [userName]);
-  useEffect(() => {
-    if (isMounted && time.year !== "" && userName !== "") {
+    if (isMounted && userName !== "") {
       setTimeout(() => {
-        setMessages([
+        const timestamp = new Date()
+          .toLocaleTimeString("zh-Hans-CN", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+          .split(" ");
+        setMessages((prev) => [
+          ...prev,
           {
             type: "received",
-            date: `${time.year}/${time.month}/${time.date}`,
-            time: `${time.hour}:${time.min}`,
-            input: `嗨${userName}！有什麼能為您效勞的嗎？`,
+            date: timestamp[0],
+            time: timestamp[1],
+            // date: `${time.year}/${time.month}/${time.date}`,
+            // time: `${time.hour}:${time.min}`,
+            input:
+              messages.length === 0
+                ? `嗨${userName}！有什麼能為您效勞的嗎？`
+                : "還有什麼能為您效勞的嗎？",
             options: [],
           },
         ]);
       }, 500);
       setTimeout(() => {
+        const timestamp = new Date()
+          .toLocaleTimeString("zh-Hans-CN", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+          .split(" ");
         setMessages((prev) => [
           ...prev,
           {
             type: "received",
-            date: `${time.year}/${time.month}/${time.date}`,
-            time: `${time.hour}:${time.min}`,
+            date: timestamp[0],
+            time: timestamp[1],
+            // date: `${time.year}/${time.month}/${time.date}`,
+            // time: `${time.hour}:${time.min}`,
             input: "",
             options: ["今日天氣", "等等吃什麼"],
           },
@@ -56,31 +67,9 @@ function ChatRoom() {
       }, 1000);
       setIsMounted(false);
     }
-  }, [isMounted, time, userName]);
-
-  const getTime = () => {
-    const year = new Date().getFullYear().toString();
-    let month = (new Date().getMonth() + 1).toString();
-    let date = new Date().getDate().toString();
-    let hour = new Date().getHours().toString();
-    let min = new Date().getMinutes().toString();
-    const checkLengthArr = [month, date, hour, min];
-    checkLengthArr.forEach((item, index) => {
-      if (item.length === 1) {
-        checkLengthArr[index] = `0${item}`;
-      }
-    });
-    setTime({
-      year,
-      month: checkLengthArr[0],
-      date: checkLengthArr[1],
-      hour: checkLengthArr[2],
-      min: checkLengthArr[3],
-    });
-  };
+  }, [isMounted, userName, messages]);
 
   const handleQuestion = (question) => {
-    getTime();
     let input = "";
     switch (question) {
       case "今日天氣":
@@ -93,12 +82,21 @@ function ChatRoom() {
         input = `${question}的天氣是？`;
         break;
     }
+    const timestamp = new Date()
+      .toLocaleTimeString("zh-Hans-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      .split(" ");
     setMessages([
       ...messages,
       {
         type: "sended",
-        date: `${time.year}/${time.month}/${time.date}`,
-        time: `${time.hour}:${time.min}`,
+        date: timestamp[0],
+        time: timestamp[1],
         input,
         options: [],
       },
@@ -106,9 +104,9 @@ function ChatRoom() {
     handleAns(input);
   };
   const handleAns = (sendMessage) => {
-    getTime();
     let input = "";
     let options = [];
+    let roundEnd = true;
     if (sendMessage === "今天天氣如何？") {
       input = "請選擇縣市";
       options = [
@@ -135,25 +133,41 @@ function ChatRoom() {
         "嘉義市",
         "屏東縣",
       ];
+      roundEnd = false;
     } else if (sendMessage.includes("天氣")) {
       const cityName = sendMessage.split("的")[0];
       setCityName(cityName);
       input = `${weather.ci}的一天：${weather.wx}、${weather.temperature[0]} ~ ${weather.temperature[1]} 度、降雨機率 ${weather.pop}% 。`;
-    } else if (sendMessage === "等等吃什麼") {
-      input = "吃土吧你";
+    } else if (sendMessage === "中午要吃什麼好？") {
+      const menu = ["滷肉飯", "牛肉麵", "拉麵"];
+      const menuKey = getRandom(menu.length);
+      input = `吃${menu[menuKey]}如何？`;
     }
     setTimeout(() => {
+      const timestamp = new Date()
+        .toLocaleTimeString("zh-Hans-CN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+        .split(" ");
       setMessages((prev) => [
         ...prev,
         {
           type: "received",
-          date: `${time.year}/${time.month}/${time.date}`,
-          time: `${time.hour}:${time.min}`,
+          date: timestamp[0],
+          time: timestamp[1],
           input,
           options,
         },
       ]);
+      setIsMounted(roundEnd);
     }, 1000);
+  };
+  const getRandom = (max) => {
+    return Math.floor(Math.random() * max);
   };
   return (
     <div>
