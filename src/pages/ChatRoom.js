@@ -3,7 +3,47 @@ import { ReplyFill, Send, GearFill } from "react-bootstrap-icons";
 import React, { useEffect, useState } from "react";
 import { useGetWeather } from "../hooks/useGetWeather";
 
-function ChatRoom() {
+const ReceivedMsg = (props) => {
+  return (
+    <DialogWrapper received>
+      <Dialog received>
+        <p className="mb-3">
+          {props.msg.input !== "" ? props.msg.input : "為您查詢："}
+        </p>
+        {props.msg.options &&
+          props.msg.options.map((option, optionKey) => (
+            <Button
+              type="button"
+              className={
+                optionKey !== props.msg.options.length - 1 ? "mb-2" : null
+              }
+              key={option}
+              onClick={(e) => props.handleQuestion(e.target.innerHTML)}
+            >
+              {option}
+            </Button>
+          ))}
+      </Dialog>
+      <div className="ml-1">
+        <Text>{props.msg.date}</Text>
+        <Text>{props.msg.time}</Text>
+      </div>
+    </DialogWrapper>
+  );
+};
+const SendedMsg = (props) => {
+  return (
+    <DialogWrapper sended>
+      <div className="mr-1 text-end">
+        <Text>{props.msg.date}</Text>
+        <Text>{props.msg.time}</Text>
+      </div>
+      <Dialog sended>{props.msg.input}</Dialog>
+    </DialogWrapper>
+  );
+};
+
+const ChatRoom = () => {
   const [userName, setUserName] = useState("");
   // const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
@@ -71,6 +111,15 @@ function ChatRoom() {
 
   const handleQuestion = (question) => {
     let input = "";
+    const timestamp = new Date()
+      .toLocaleTimeString("zh-Hans-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      .split(" ");
     switch (question) {
       case "今日天氣":
         input = "今天天氣如何？";
@@ -82,15 +131,6 @@ function ChatRoom() {
         input = `${question}的天氣是？`;
         break;
     }
-    const timestamp = new Date()
-      .toLocaleTimeString("zh-Hans-CN", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-      .split(" ");
     setMessages([
       ...messages,
       {
@@ -139,7 +179,23 @@ function ChatRoom() {
       setCityName(cityName);
       input = `${weather.ci}的一天：${weather.wx}、${weather.temperature[0]} ~ ${weather.temperature[1]} 度、降雨機率 ${weather.pop}% 。`;
     } else if (sendMessage === "中午要吃什麼好？") {
-      const menu = ["滷肉飯", "牛肉麵", "拉麵"];
+      const menu = [
+        "金仙",
+        "晶饌",
+        "孫家便當",
+        "自己",
+        "麥當當",
+        "麥味登",
+        "土",
+        "珍香",
+        "誠屋",
+        "アツアツ",
+        "雙連食堂",
+        "百八",
+        "壽司郎",
+        "強尼兄弟",
+        "摩斯",
+      ];
       const menuKey = getRandom(menu.length);
       input = `吃${menu[menuKey]}如何？`;
     }
@@ -181,58 +237,17 @@ function ChatRoom() {
         </a>
       </Header>
       <Body>
-        {messages.map((message, messageKey) => {
-          if (message.type === "received") {
-            if (message.options.length === 0) {
-              return (
-                <DialogWrapper received key={`id${messageKey}`}>
-                  <Dialog received>{message.input}</Dialog>
-                  <div className="ml-1">
-                    <Text>{message.date}</Text>
-                    <Text>{message.time}</Text>
-                  </div>
-                </DialogWrapper>
-              );
-            } else {
-              return (
-                <DialogWrapper received key={`id${messageKey}`}>
-                  <Dialog received>
-                    <p className="mb-3">
-                      {message.input !== "" ? message.input : "為您查詢："}
-                    </p>
-                    {message.options.map((option, optionKey) => (
-                      <Button
-                        type="button"
-                        className={
-                          optionKey !== message.options.length - 1
-                            ? "mb-2"
-                            : null
-                        }
-                        key={option}
-                        onClick={(e) => handleQuestion(e.target.innerHTML)}
-                      >
-                        {option}
-                      </Button>
-                    ))}
-                  </Dialog>
-                  <div className="ml-1">
-                    <Text>{message.date}</Text>
-                    <Text>{message.time}</Text>
-                  </div>
-                </DialogWrapper>
-              );
-            }
-          } else
-            return (
-              <DialogWrapper sended key={`id${messageKey}`}>
-                <div className="mr-1 text-end">
-                  <Text>{message.date}</Text>
-                  <Text>{message.time}</Text>
-                </div>
-                <Dialog sended>{message.input}</Dialog>
-              </DialogWrapper>
-            );
-        })}
+        {messages.map((message, messageKey) =>
+          message.type === "received" ? (
+            <ReceivedMsg
+              msg={message}
+              handleQuestion={handleQuestion}
+              key={`id${messageKey}`}
+            />
+          ) : (
+            <SendedMsg msg={message} key={`id${messageKey}`} />
+          )
+        )}
       </Body>
       {/* <Footer>
         <Input value={input} onChange={(e) => setInput(e.target.value)} />
@@ -247,7 +262,7 @@ function ChatRoom() {
       </Footer> */}
     </div>
   );
-}
+};
 
 const theme = {
   primary: "#d7c378",
