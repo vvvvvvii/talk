@@ -1,6 +1,10 @@
 import styled, { css } from "styled-components";
 import { ReplyFill, Send, GearFill } from "react-bootstrap-icons";
 import React, { useEffect, useState } from "react";
+import { useGetWeather } from "../hooks/useGetWeather";
+import axios from "axios";
+
+let targetURL = `https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=${process.env.REACT_APP_URL}&format=JSON`;
 
 function ChatRoom() {
   const [userName, setUserName] = useState("");
@@ -11,8 +15,11 @@ function ChatRoom() {
     hour: "",
     min: "",
   });
-  const [input, setInput] = useState("");
+  // const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [isMounted, setIsMounted] = useState(true);
+  const [cityName, setCityName] = useState("臺北市");
+  const weather = useGetWeather(cityName);
 
   useEffect(() => {
     setUserName(localStorage.getItem("talkUserName"));
@@ -23,7 +30,7 @@ function ChatRoom() {
     }
   }, [userName]);
   useEffect(() => {
-    if (time.year !== "" && userName !== "") {
+    if (isMounted && time.year !== "" && userName !== "") {
       setTimeout(() => {
         setMessages([
           {
@@ -43,12 +50,13 @@ function ChatRoom() {
             date: `${time.year}/${time.month}/${time.date}`,
             time: `${time.hour}:${time.min}`,
             input: "",
-            options: ["查詢今日天氣", "等等吃什麼"],
+            options: ["今日天氣", "等等吃什麼"],
           },
         ]);
       }, 1000);
+      setIsMounted(false);
     }
-  }, [time.year, time.month, time.date, time.hour, time.min, userName]);
+  }, [isMounted, time, userName]);
 
   const getTime = () => {
     const year = new Date().getFullYear().toString();
@@ -70,24 +78,82 @@ function ChatRoom() {
       min: checkLengthArr[3],
     });
   };
-  const sendMessage = (e) => {
-    e.preventDefault();
-    const year = new Date().getFullYear();
-    const month = new Date().getMonth() + 1;
-    const date = new Date().getDate();
-    const hour = new Date().getHours();
-    const min = new Date().getMinutes();
+
+  const handleQuestion = (question) => {
+    getTime();
+    let input = "";
+    switch (question) {
+      case "今日天氣":
+        input = "今天天氣如何？";
+        break;
+      case "等等吃什麼":
+        input = "中午要吃什麼好？";
+        break;
+      default:
+        input = `${question}的天氣是？`;
+        break;
+    }
     setMessages([
       ...messages,
       {
         type: "sended",
-        date: `${year}/${month}/${date}`,
-        time: `${hour}:${min}`,
+        date: `${time.year}/${time.month}/${time.date}`,
+        time: `${time.hour}:${time.min}`,
         input,
         options: [],
       },
     ]);
-    setInput("");
+    handleAns(input);
+  };
+  const handleAns = (sendMessage) => {
+    getTime();
+    let input = "";
+    let options = [];
+    if (sendMessage === "今天天氣如何？") {
+      input = "請選擇縣市";
+      options = [
+        "宜蘭縣",
+        "花蓮縣",
+        "臺東縣",
+        "澎湖縣",
+        "金門縣",
+        "連江縣",
+        "臺北市",
+        "新北市",
+        "桃園市",
+        "臺中市",
+        "臺南市",
+        "高雄市",
+        "基隆市",
+        "新竹縣",
+        "新竹市",
+        "苗栗縣",
+        "彰化縣",
+        "南投縣",
+        "雲林縣",
+        "嘉義縣",
+        "嘉義市",
+        "屏東縣",
+      ];
+    } else if (sendMessage.includes("天氣")) {
+      const cityName = sendMessage.split("的")[0];
+      setCityName(cityName);
+      input = `${weather.ci}的一天：${weather.wx}、${weather.temperature[0]} ~ ${weather.temperature[1]} 度、降雨機率 ${weather.pop}% 。`;
+    } else if (sendMessage === "等等吃什麼") {
+      input = "吃土吧你";
+    }
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "received",
+          date: `${time.year}/${time.month}/${time.date}`,
+          time: `${time.hour}:${time.min}`,
+          input,
+          options,
+        },
+      ]);
+    }, 1000);
   };
   return (
     <div>
@@ -117,8 +183,22 @@ function ChatRoom() {
               return (
                 <DialogWrapper received key={`id${messageKey}`}>
                   <Dialog received>
-                    {message.options.map((option) => (
-                      <p key={option}>{option}</p>
+                    <p className="mb-3">
+                      {message.input !== "" ? message.input : "為您查詢："}
+                    </p>
+                    {message.options.map((option, optionKey) => (
+                      <Button
+                        type="button"
+                        className={
+                          optionKey !== message.options.length - 1
+                            ? "mb-2"
+                            : null
+                        }
+                        key={option}
+                        onClick={(e) => handleQuestion(e.target.innerHTML)}
+                      >
+                        {option}
+                      </Button>
                     ))}
                   </Dialog>
                   <div className="ml-1">
@@ -140,7 +220,7 @@ function ChatRoom() {
             );
         })}
       </Body>
-      <Footer>
+      {/* <Footer>
         <Input value={input} onChange={(e) => setInput(e.target.value)} />
         <a
           href="/"
@@ -150,10 +230,11 @@ function ChatRoom() {
         >
           <Send className="ml-2 fs-4" color="#6b5103" />
         </a>
-      </Footer>
+      </Footer> */}
     </div>
   );
 }
+
 const theme = {
   primary: "#d7c378",
   lightPrimary: "#faf7ec",
@@ -162,7 +243,6 @@ const theme = {
   info: "#1fb50c",
   white: "#fff",
 };
-
 const Header = styled.div`
   position: fixed;
   top: 0;
@@ -201,6 +281,20 @@ const Input = styled.input`
     background: #fff;
   }
 `;
+const Button = styled.button`
+  display: block;
+  border-radius: 0.25rem;
+  border: 1px solid #1fb50c;
+  padding: 0.5rem;
+  background: transparent;
+  color: #1fb50c;
+  &:hover {
+    border: 1px solid transparent;
+    color: white;
+    background: #d7c378;
+  }
+`;
+
 const Text = styled.p`
   font-size: 0.875rem;
   color: #6b5103;
