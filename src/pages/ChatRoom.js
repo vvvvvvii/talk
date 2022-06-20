@@ -7,7 +7,7 @@ const ReceivedMsg = (props) => {
   return (
     <DialogWrapper received>
       <Dialog received>
-        <p className="mb-3">
+        <p className={props.msg.options.length > 0 ? "mb-3" : null}>
           {props.msg.input !== "" ? props.msg.input : "為您查詢："}
         </p>
         {props.msg.options &&
@@ -280,12 +280,18 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2.5rem;
+  padding: 1.5rem;
   background: #fbdf5a;
   color: #6b5103;
+  @media screen and (min-width: 576px) {
+    padding: 2.5rem;
+  }
 `;
 const Body = styled.div`
-  padding: 10rem 2.5rem;
+  padding: 7.5rem 1.5rem;
+  @media screen and (min-width: 576px) {
+    padding: 10rem 2.5rem;
+  }
 `;
 const Footer = styled.div`
   position: fixed;
@@ -329,7 +335,7 @@ const Text = styled.p`
   color: #6b5103;
 `;
 const DialogWrapper = styled.div`
-  margin: 3rem;
+  margin-bottom: 3rem;
   display: flex;
   align-items: end;
   ${(props) =>
@@ -339,7 +345,7 @@ const DialogWrapper = styled.div`
     `}
 `;
 const Dialog = styled.div`
-  max-width: 50%;
+  /* max-width: 50%; */
   position: relative;
   background-color: #fef1bd;
   padding: 1rem 1.5rem;
@@ -364,6 +370,9 @@ const Dialog = styled.div`
           border-width: 16px 16px 0 0;
           left: 30px;
         `)}
+  }
+  @media screen and (min-width: 576px) {
+    max-width: 50%;
   }
 `;
 export default ChatRoom;

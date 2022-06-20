@@ -11,13 +11,13 @@ const theme = {
     defaultSpacer * 2.5,
   ],
   fonts: [
-    0,
-    fontSizeBase * 10,
-    fontSizeBase * 1.75,
-    fontSizeBase * 1.5,
-    fontSizeBase * 1.25,
-    fontSizeBase,
-    fontSizeBase * 0.875,
+    [0, 0],
+    [fontSizeBase * 6, fontSizeBase * 10],
+    [fontSizeBase * 1.5, fontSizeBase * 1.75],
+    [fontSizeBase * 1.25, fontSizeBase * 1.5],
+    [fontSizeBase, fontSizeBase * 1.25],
+    [fontSizeBase * 0.875, fontSizeBase],
+    [fontSizeBase * 0.75, fontSizeBase * 0.875],
   ],
 };
 const GlobalStyle = createGlobalStyle`
@@ -33,7 +33,10 @@ const GlobalStyle = createGlobalStyle`
   ${theme.fonts.map(
     (font, fontKey) => css`
       .fs-${fontKey} {
-        font-size: ${font}rem !important;
+        font-size: ${font[0]}rem !important;
+        @media screen and (min-width: 576px) {
+          font-size: ${font[1]}rem !important;
+        }
       }
     `
   )}
