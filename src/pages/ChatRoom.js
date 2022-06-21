@@ -2,14 +2,38 @@ import styled, { css } from "styled-components";
 import { ReplyFill, Send, GearFill } from "react-bootstrap-icons";
 import React, { useEffect, useState } from "react";
 import { useGetWeather } from "../hooks/useGetWeather";
+import WeatherMap from "../components/WeatherMap";
 
 const ReceivedMsg = (props) => {
+  const [weatherName, setWeatherName] = useState([]);
+  const hoverWeatherMap = (name, enName) => {
+    setWeatherName([name, enName]);
+  };
   return (
     <DialogWrapper received>
       <Dialog received>
         <p className={props.msg.options.length > 0 ? "mb-3" : null}>
           {props.msg.input !== "" ? props.msg.input : "為您查詢："}
         </p>
+        {props.msg.input === "請選擇縣市" && (
+          <div>
+            <svg className="svg">
+              <WeatherMap
+                msg={props.msg}
+                hoverWeatherMap={hoverWeatherMap}
+                handleQuestion={props.handleQuestion}
+              />
+              <text x="5%" y="20%" className="svg-title">
+                {/* x="30" y="150" */}
+                {weatherName[0]}
+              </text>
+              <text x="5%" y="25%" className="svg-text">
+                {/* x="30" y="175" */}
+                {weatherName[1]}
+              </text>
+            </svg>
+          </div>
+        )}
         {props.msg.options &&
           props.msg.options.map((option, optionKey) => (
             <Button
@@ -42,7 +66,6 @@ const SendedMsg = (props) => {
     </DialogWrapper>
   );
 };
-
 const ChatRoom = () => {
   const [userName, setUserName] = useState("");
   // const [input, setInput] = useState("");
@@ -72,8 +95,6 @@ const ChatRoom = () => {
             type: "received",
             date: timestamp[0],
             time: timestamp[1],
-            // date: `${time.year}/${time.month}/${time.date}`,
-            // time: `${time.hour}:${time.min}`,
             input:
               messages.length === 0
                 ? `嗨${userName}！有什麼能為您效勞的嗎？`
@@ -98,8 +119,6 @@ const ChatRoom = () => {
             type: "received",
             date: timestamp[0],
             time: timestamp[1],
-            // date: `${time.year}/${time.month}/${time.date}`,
-            // time: `${time.hour}:${time.min}`,
             input: "",
             options: ["今日天氣", "等等吃什麼"],
           },
@@ -120,16 +139,12 @@ const ChatRoom = () => {
         minute: "2-digit",
       })
       .split(" ");
-    switch (question) {
-      case "今日天氣":
-        input = "今天天氣如何？";
-        break;
-      case "等等吃什麼":
-        input = "中午要吃什麼好？";
-        break;
-      default:
-        input = `${question}的天氣是？`;
-        break;
+    if (question === "今日天氣") {
+      input = "今天天氣如何？";
+    } else if (question.includes("市") || question.includes("縣")) {
+      input = `${question}的天氣是？`;
+    } else if (question === "等等吃什麼") {
+      input = "中午要吃什麼好？";
     }
     setMessages([
       ...messages,
@@ -149,34 +164,33 @@ const ChatRoom = () => {
     let roundEnd = true;
     if (sendMessage === "今天天氣如何？") {
       input = "請選擇縣市";
-      options = [
-        "宜蘭縣",
-        "花蓮縣",
-        "臺東縣",
-        "澎湖縣",
-        "金門縣",
-        "連江縣",
-        "臺北市",
-        "新北市",
-        "桃園市",
-        "臺中市",
-        "臺南市",
-        "高雄市",
-        "基隆市",
-        "新竹縣",
-        "新竹市",
-        "苗栗縣",
-        "彰化縣",
-        "南投縣",
-        "雲林縣",
-        "嘉義縣",
-        "嘉義市",
-        "屏東縣",
-      ];
+      // options = [
+      //   "宜蘭縣",
+      //   "花蓮縣",
+      //   "臺東縣",
+      //   "澎湖縣",
+      //   "金門縣",
+      //   "連江縣",
+      //   "臺北市",
+      //   "新北市",
+      //   "桃園市",
+      //   "臺中市",
+      //   "臺南市",
+      //   "高雄市",
+      //   "基隆市",
+      //   "新竹縣",
+      //   "新竹市",
+      //   "苗栗縣",
+      //   "彰化縣",
+      //   "南投縣",
+      //   "雲林縣",
+      //   "嘉義縣",
+      //   "嘉義市",
+      //   "屏東縣",
+      // ];
       roundEnd = false;
     } else if (sendMessage.includes("天氣")) {
-      const cityName = sendMessage.split("的")[0];
-      setCityName(cityName);
+      setCityName(sendMessage.split("的")[0]);
       input = `${weather.ci}的一天：${weather.wx}、${weather.temperature[0]} ~ ${weather.temperature[1]} 度、降雨機率 ${weather.pop}% 。`;
     } else if (sendMessage === "中午要吃什麼好？") {
       const menu = [
@@ -225,6 +239,7 @@ const ChatRoom = () => {
   const getRandom = (max) => {
     return Math.floor(Math.random() * max);
   };
+
   return (
     <div>
       <Header>
