@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/talk/static/css/main.f26c54e8.css",
-    "main.js": "/talk/static/js/main.1518d8aa.js",
+    "main.js": "/talk/static/js/main.3f688ca7.js",
     "static/js/787.806a0a82.chunk.js": "/talk/static/js/787.806a0a82.chunk.js",
     "static/media/taiwan.geojson": "/talk/static/media/taiwan.16a19f719638a4ff0ffe.geojson",
     "index.html": "/talk/index.html",
     "main.f26c54e8.css.map": "/talk/static/css/main.f26c54e8.css.map",
-    "main.1518d8aa.js.map": "/talk/static/js/main.1518d8aa.js.map",
+    "main.3f688ca7.js.map": "/talk/static/js/main.3f688ca7.js.map",
     "787.806a0a82.chunk.js.map": "/talk/static/js/787.806a0a82.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f26c54e8.css",
-    "static/js/main.1518d8aa.js"
+    "static/js/main.3f688ca7.js"
   ]
 }
